@@ -1,5 +1,5 @@
 """
-ORCID Authentication Endpoints for FastAPI.
+Endpoints de Autenticação ORCID para FastAPI.
 """
 
 from typing import Optional, Dict, Any
@@ -14,7 +14,7 @@ from src.config.settings import settings
 import secrets
 import uuid
 
-router = APIRouter(prefix="/auth/orcid", tags=["ORCID Authentication"])
+router = APIRouter(prefix="/auth/orcid", tags=["Autenticação ORCID"])
 
 state_tokens = {}
 
@@ -22,7 +22,7 @@ state_tokens = {}
 @router.get("/login")
 async def orcid_login(request: Request):
     """
-    Initiate ORCID OAuth 2.0 authentication flow.
+    Inicia o fluxo de autenticação OAuth 2.0 do ORCID.
     """
     state = secrets.token_urlsafe(32)
     state_tokens[state] = {
@@ -40,7 +40,7 @@ async def orcid_callback(
     session: Session = Depends(get_session)
 ):
     """
-    Handle ORCID OAuth 2.0 callback.
+    Manipula o retorno (callback) do OAuth 2.0 do ORCID.
     """
     code = request.query_params.get("code")
     state = request.query_params.get("state")
@@ -48,7 +48,7 @@ async def orcid_callback(
     if not state or state not in state_tokens:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Invalid or missing state parameter"
+            detail="Parâmetro state ausente ou inválido"
         )
 
     del state_tokens[state]
@@ -56,7 +56,7 @@ async def orcid_callback(
     if not code:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Authorization code not provided"
+            detail="Código de autorização não fornecido"
         )
 
     try:
@@ -70,7 +70,7 @@ async def orcid_callback(
         if not access_token or not orcid_id:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="Failed to retrieve token or ORCID ID"
+                detail="Falha ao obter token ou ORCID ID"
             )
 
         user_service = UserService(session)
@@ -93,7 +93,7 @@ async def orcid_callback(
         jwt_token = auth_service.create_access_token({"sub": user.id})
 
         return {
-            "message": "ORCID authentication successful",
+            "message": "Autenticação ORCID realizada com sucesso",
             "access_token": jwt_token,
             "token_type": "bearer",
             "user_id": user.id,
@@ -105,17 +105,17 @@ async def orcid_callback(
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Unexpected error during ORCID authentication: {str(e)}"
+            detail=f"Erro inesperado durante a autenticação ORCID: {str(e)}"
         )
 
 
 @router.get("/logout")
 async def orcid_logout():
-    """Logout from ORCID session."""
-    return {"message": "ORCID logout successful", "status": "success"}
+    """Encerra a sessão ORCID."""
+    return {"message": "Logout do ORCID realizado com sucesso", "status": "sucesso"}
 
 
 @router.get("/test")
 async def orcid_test():
-    """Test endpoint for ORCID configuration status."""
-    return {"message": "ORCID service is working", "configured": bool(settings.orcid_client_id)}
+    """Endpoint de teste do status da configuração do ORCID."""
+    return {"message": "O serviço ORCID está em execução", "configurado": bool(settings.orcid_client_id)}

@@ -1,9 +1,9 @@
 """
-Article service - Business logic for academic articles.
-Handles DOI resolution, ORCID synchronization, and article CRUD.
+Serviço de Artigo - Lógica de negócios para artigos acadêmicos.
+Trata resolução de DOI, sincronização ORCID e CRUD de artigos.
 """
 
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Optional, List
 from sqlmodel import Session, select
 from src.models.article import Article
@@ -11,17 +11,11 @@ from src.models.article import Article
 
 class ArticleService:
     """
-    Service layer for Article operations.
-    
-    Responsibilities:
-    - Article CRUD operations
-    - DOI resolution and validation
-    - ORCID synchronization
-    - Security-sensitive operations
+    Camada de serviço para operações com Artigos.
     """
 
     def __init__(self, session: Session):
-        """Initialize service with database session."""
+        """Inicializa o serviço com a sessão do banco de dados."""
         self.session = session
 
     def create_article(
@@ -48,27 +42,10 @@ class ArticleService:
         user_id: Optional[str] = None,
     ) -> Article:
         """
-        Create a new article.
-        
-        Args:
-            title: Article title (required)
-            content: Optional article content
-            doi: Digital Object Identifier
-            publication_type: e.g., journal article, conference paper
-            publication_date: YYYY-MM-DD
-            volume, issue, pages, e_issn, p_issn
-            abstract, keywords, url, publisher, language
-            authors: JSON string or plain string of author information
-            tags: Comma-separated tags
-            notes: Private notes
-            is_public: Whether article is publicly visible
-            user_id: Owner user ID
-            
-        Returns:
-            Created Article instance
+        Cria um novo artigo acadêmico.
         """
         if not title:
-            raise ValueError("Title is required")
+            raise ValueError("O título é obrigatório")
 
         title = self._sanitize_string(title, max_length=1000)
         doi = self._sanitize_string(doi, max_length=100) if doi else None
@@ -82,7 +59,7 @@ class ArticleService:
             ).first()
             if existing:
                 existing.doi_resolved = doi
-                existing.doi_last_checked = datetime.utcnow().isoformat()
+                existing.doi_last_checked = datetime.now(timezone.utc).isoformat()
                 self.session.add(existing)
                 self.session.commit()
                 self.session.refresh(existing)
@@ -93,7 +70,7 @@ class ArticleService:
             content=content,
             doi=doi,
             doi_resolved=doi,
-            doi_last_checked=datetime.utcnow().isoformat() if doi else None,
+            doi_last_checked=datetime.now(timezone.utc).isoformat() if doi else None,
             publication_type=publication_type,
             publication_date=publication_date,
             volume=volume,
@@ -121,21 +98,21 @@ class ArticleService:
         return article
 
     def get_article(self, article_id: str) -> Optional[Article]:
-        """Get article by ID (active only)."""
+        """Obtém artigo por ID (apenas ativos)."""
         return self.session.exec(
             select(Article)
             .where(Article.id == article_id, Article.is_deleted == False)
         ).first()
 
     def get_articles_by_user(self, user_id: str) -> List[Article]:
-        """Get all articles owned by or associated with a user."""
+        """Obtém todos os artigos associados a um usuário."""
         return list(self.session.exec(
             select(Article)
             .where(Article.user_id == user_id, Article.is_deleted == False)
         ).all())
 
     def get_by_doi(self, doi: str) -> Optional[Article]:
-        """Get article by DOI (active only)."""
+        """Obtém artigo por DOI (apenas ativos)."""
         return self.session.exec(
             select(Article)
             .where(Article.doi == doi, Article.is_deleted == False)
@@ -166,16 +143,14 @@ class ArticleService:
         user_id: Optional[str] = None,
     ) -> Optional[Article]:
         """
-        Update article fields.
-        
-        Returns None if article not found.
+        Atualiza os campos do artigo.
         """
         article = self.get_article(article_id)
         if not article:
             return None
 
         if user_id and article.user_id and article.user_id != user_id and user_id != "admin":
-            raise PermissionError("Only the article owner can modify this article")
+            raise PermissionError("Apenas o proprietário do artigo pode modificá-lo")
 
         if title is not None:
             article.title = self._sanitize_string(title, max_length=1000)
@@ -185,7 +160,7 @@ class ArticleService:
             sanitized_doi = self._sanitize_string(doi, max_length=100)
             article.doi = sanitized_doi
             article.doi_resolved = sanitized_doi
-            article.doi_last_checked = datetime.utcnow().isoformat()
+            article.doi_last_checked = datetime.now(timezone.utc).isoformat()
         if publication_type is not None:
             article.publication_type = self._sanitize_string(publication_type, max_length=100)
         if publication_date is not None:
@@ -228,16 +203,14 @@ class ArticleService:
 
     def delete_article(self, article_id: str, user_id: Optional[str] = None) -> bool:
         """
-        Soft delete article.
-        
-        Only owner or admin can delete.
+        Realiza exclusão lógica (soft delete) do artigo.
         """
         article = self.get_article(article_id)
         if not article:
             return False
 
         if user_id and article.user_id and article.user_id != user_id and user_id != "admin":
-            raise PermissionError("Only the article owner can delete this article")
+            raise PermissionError("Apenas o proprietário do artigo pode excluí-lo")
 
         article.is_deleted = True
         self.session.commit()
@@ -250,33 +223,25 @@ class ArticleService:
         user_id: str,
     ) -> dict:
         """
-        Synchronize articles from ORCID API.
-        
-        Args:
-            orcid_id: ORCID identifier
-            access_token: OAuth access token (never logged)
-            user_id: User ID
-            
-        Returns:
-            Synchronization result
+        Sincroniza artigos a partir da API do ORCID.
         """
         from src.services.user_service import UserService
 
         user_service = UserService(self.session)
         user = user_service.get_user_by_id(user_id)
         if not user:
-            raise ValueError("User not found")
+            raise ValueError("Usuário não encontrado")
 
         user_service.set_orcid_tokens(user_id, orcid_id, access_token)
 
         return {
             "orcid_id": orcid_id,
             "synchronized": True,
-            "synced_at": datetime.utcnow().isoformat(),
+            "synced_at": datetime.now(timezone.utc).isoformat(),
         }
 
     def _sanitize_string(self, value: Optional[str], max_length: int = 1000) -> str:
-        """Sanitize string input to prevent injection attacks."""
+        """Sanitiza entrada de texto para prevenir ataques de injeção."""
         if not value:
             return ""
         sanitized = value.replace("\x00", "")

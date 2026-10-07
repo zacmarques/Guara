@@ -1,5 +1,5 @@
 """
-ORCID Service for OAuth 2.0 Authentication and API Integration.
+Serviço ORCID para Autenticação OAuth 2.0 e Integração com API.
 """
 
 from typing import Optional, Dict, Any
@@ -14,7 +14,7 @@ from src.services.user_service import UserService
 
 class ORCIDService:
     """
-    Service for handling ORCID OAuth 2.0 authentication and API interactions.
+    Serviço para manipulação da autenticação OAuth 2.0 e requisições da API ORCID.
     """
 
     def __init__(self, session: Optional[Session] = None):
@@ -25,18 +25,12 @@ class ORCIDService:
         self.scopes = settings.orcid_scopes
 
     def get_authorization_url(self, state: str) -> str:
-        """Alias for get_orcid_auth_url."""
+        """Alias para get_orcid_auth_url."""
         return self.get_orcid_auth_url(state)
 
     def get_orcid_auth_url(self, state: str) -> str:
         """
-        Generate the ORCID authorization URL for OAuth 2.0 flow.
-        
-        Args:
-            state (str): CSRF protection token
-            
-        Returns:
-            str: Authorization URL for ORCID
+        Gera a URL de autorização do ORCID para o fluxo OAuth 2.0.
         """
         params = {
             'client_id': self.client_id,
@@ -50,18 +44,12 @@ class ORCIDService:
         return auth_url
 
     async def exchange_token(self, code: str) -> Dict[str, Any]:
-        """Alias for exchange_code_for_token."""
+        """Alias para exchange_code_for_token."""
         return await self.exchange_code_for_token(code)
 
     async def exchange_code_for_token(self, code: str) -> Dict[str, Any]:
         """
-        Exchange authorization code for access token.
-        
-        Args:
-            code (str): Authorization code from ORCID
-            
-        Returns:
-            Dict[str, Any]: Token response with access_token and refresh_token
+        Troca o código de autorização por um token de acesso.
         """
         data = {
             'client_id': self.client_id,
@@ -83,12 +71,12 @@ class ORCIDService:
         except httpx.HTTPError as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Failed to exchange ORCID code for token: {str(e)}"
+                detail=f"Falha ao trocar código ORCID por token: {str(e)}"
             )
 
     async def refresh_token(self, refresh_token_val: str) -> Dict[str, Any]:
         """
-        Refresh access token using refresh_token.
+        Atualiza o token de acesso utilizando o refresh_token.
         """
         data = {
             'client_id': self.client_id,
@@ -110,19 +98,12 @@ class ORCIDService:
         except httpx.HTTPError as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Failed to refresh ORCID token: {str(e)}"
+                detail=f"Falha ao atualizar token ORCID: {str(e)}"
             )
 
     async def get_user_profile(self, access_token: str, orcid_id: Optional[str] = None) -> Dict[str, Any]:
         """
-        Fetch user profile information from ORCID API.
-        
-        Args:
-            access_token (str): Valid access token
-            orcid_id (str, optional): ORCID ID
-            
-        Returns:
-            Dict[str, Any]: User profile data from ORCID
+        Obtém informações do perfil do usuário na API do ORCID.
         """
         url = f"https://pub.orcid.org/v3.0/{orcid_id}/record" if orcid_id else "https://pub.orcid.org/v3.0/record"
         try:
@@ -139,12 +120,12 @@ class ORCIDService:
         except httpx.HTTPError as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Failed to fetch ORCID user profile: {str(e)}"
+                detail=f"Falha ao obter perfil do usuário no ORCID: {str(e)}"
             )
 
     async def get_user_works(self, access_token: str, orcid_id: str) -> Dict[str, Any]:
         """
-        Fetch user works from ORCID API.
+        Obtém as obras/produções do usuário na API do ORCID.
         """
         url = f"https://pub.orcid.org/v3.0/{orcid_id}/works"
         try:
@@ -161,12 +142,12 @@ class ORCIDService:
         except httpx.HTTPError as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Failed to fetch ORCID works: {str(e)}"
+                detail=f"Falha ao obter produções do ORCID: {str(e)}"
             )
 
     async def get_user_by_orcid_id(self, orcid_id: str) -> Optional[User]:
         """
-        Get user by ORCID ID from database session.
+        Obtém usuário por ORCID ID na sessão do banco de dados.
         """
         if not self.session:
             return None
@@ -175,10 +156,10 @@ class ORCIDService:
 
     async def create_or_update_user_from_orcid(self, orcid_data: Dict[str, Any], user_id: Optional[str] = None) -> User:
         """
-        Create or update user based on ORCID profile data.
+        Cria ou atualiza usuário com base nos dados do perfil do ORCID.
         """
         if not self.session:
-            raise ValueError("Database session is required")
+            raise ValueError("Sessão do banco de dados é necessária")
 
         user_service = UserService(self.session)
         orcid_id = orcid_data.get("orcid-identifier", {}).get("path") or orcid_data.get("orcid")

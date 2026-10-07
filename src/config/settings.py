@@ -1,6 +1,6 @@
 """
-GUARA Configuration - Production-ready settings with strict security defaults.
-Uses pydantic-settings for type-safe, validated configuration.
+Configuração do GUARA - Configurações prontas para produção com padrões de segurança rígidos.
+Utiliza pydantic-settings para configuração tipada e validada.
 """
 
 import os
@@ -11,7 +11,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
     """
-    Application settings with strict defaults and security hardening.
+    Configurações da aplicação com padrões de segurança e endurecimento.
     """
 
     model_config = SettingsConfigDict(
@@ -23,32 +23,32 @@ class Settings(BaseSettings):
         revalidate_instances="always",
     )
 
-    # Application
+    # Aplicação
     app_name: str = "GUARA"
     app_version: str = "0.1.0"
     debug: bool = False
 
-    # Database
+    # Banco de Dados
     database_url: str = os.getenv("DATABASE_URL", "sqlite:///./guara.db")
     database_pool_size: int = 10
     database_max_overflow: int = 20
     database_echo: bool = False
 
-    # Security
+    # Segurança
     security_secret_key: str = (
-        os.getenv("SECRET_KEY", "your-secret-key-change-in-production-use-32-bytes-minimum")
+        os.getenv("SECRET_KEY", "chave-secreta-alterar-em-producao-com-no-minimo-32-bytes")
     )
     security_algorithm: str = "HS256"
     security_access_token_expire_minutes: int = 30
-    security_refresh_token_expire_minutes: int = 604800  # 7 days
+    security_refresh_token_expire_minutes: int = 604800  # 7 dias
 
-    # bcrypt cost factor - minimum 12 for production security
+    # Fator de custo do bcrypt - mínimo 12 para segurança em produção
     security_bcrypt_cost: int = 12
 
-    # CORS (strict mode - only allow specific origins)
+    # CORS (modo estrito - permite apenas origens específicas)
     cors_origins: List[str] = ["http://localhost:3000", "https://localhost:8000", "https://guara.example.com"]
 
-    # ORCID API (HTTPS requirement for OAuth 2.0 redirect)
+    # API ORCID (Requisito HTTPS para redirecionamento OAuth 2.0)
     orcid_client_id: str = os.getenv("ORCID_CLIENT_ID", "")
     orcid_client_secret: str = os.getenv("ORCID_CLIENT_SECRET", "")
     orcid_redirect_uri: str = os.getenv("ORCID_REDIRECT_URI", "https://localhost:8000/api/auth/orcid/callback")
@@ -59,7 +59,7 @@ class Settings(BaseSettings):
         "read_works_extended",
     ]
 
-    # Rate limiting
+    # Limitação de taxa (Rate limiting)
     rate_limit_requests: int = 100
     rate_limit_period_seconds: int = 60
 
@@ -67,7 +67,7 @@ class Settings(BaseSettings):
     log_level: str = "INFO"
     log_format: str = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 
-    # Password hashing
+    # Validação de senhas
     password_min_length: int = 12
     password_require_uppercase: bool = True
     password_require_lowercase: bool = True
@@ -76,25 +76,25 @@ class Settings(BaseSettings):
 
     @property
     def is_production(self) -> bool:
-        """Check if running in production mode."""
+        """Verifica se está executando em modo de produção."""
         return not self.debug and self.database_echo is False
 
     @property
     def is_development(self) -> bool:
-        """Check if running in development mode."""
+        """Verifica se está executando em modo de desenvolvimento."""
         return self.debug
 
     @property
     def allowed_origins(self) -> List[str]:
-        """Get validated CORS origins."""
+        """Obtém origens CORS validadas."""
         return [origin.strip() for origin in self.cors_origins if origin]
 
 
 @lru_cache()
 def get_settings() -> Settings:
-    """Cached settings getter."""
+    """Obtém instância de configurações em cache."""
     return Settings()
 
 
-# Singleton instance for direct access
+# Instância singleton para acesso direto
 settings: Settings = get_settings()

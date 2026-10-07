@@ -1,5 +1,5 @@
 """
-Integration tests for GUARA API Endpoints.
+Testes de integração para os Endpoints da API GUARA.
 """
 
 import pytest
@@ -8,7 +8,7 @@ from sqlmodel import Session, create_engine, SQLModel
 from sqlalchemy.pool import StaticPool
 from src.main import app
 from src.api.deps import get_session
-from src.models import User, Article  # Ensure models registered with SQLModel
+from src.models import User, Article
 
 test_engine = create_engine(
     "sqlite:///:memory:",
@@ -45,7 +45,7 @@ def test_register_and_login_flow():
         json={
             "email": "apiuser@example.com",
             "password": "ApiUser123!_Pass",
-            "full_name": "API User",
+            "full_name": "Usuário da API",
         },
     )
     assert reg_response.status_code == 201
@@ -71,7 +71,7 @@ def test_register_and_login_flow():
 
 
 def test_article_crud_flow():
-    # Register & Login
+    # Cadastro e Login
     client.post(
         "/api/auth/register",
         json={"email": "writer@example.com", "password": "Writer123!_Pass"},
@@ -83,29 +83,29 @@ def test_article_crud_flow():
     token = login_res.json()["access_token"]
     headers = {"Authorization": f"Bearer {token}"}
 
-    # Create Article
+    # Criar Artigo
     create_res = client.post(
         "/api/articles",
         headers=headers,
-        json={"title": "New Research Article", "doi": "10.1000/182_test"},
+        json={"title": "Novo Artigo de Pesquisa", "doi": "10.1000/182_test"},
     )
     assert create_res.status_code == 201
     article_id = create_res.json()["id"]
 
-    # Get Articles
+    # Obter Artigos
     list_res = client.get("/api/articles", headers=headers)
     assert list_res.status_code == 200
     assert len(list_res.json()) >= 1
 
-    # Update Article
+    # Atualizar Artigo
     update_res = client.put(
         f"/api/articles/{article_id}",
         headers=headers,
-        json={"title": "Updated Research Article Title"},
+        json={"title": "Título do Artigo Atualizado"},
     )
     assert update_res.status_code == 200
-    assert update_res.json()["title"] == "Updated Research Article Title"
+    assert update_res.json()["title"] == "Título do Artigo Atualizado"
 
-    # Delete Article
+    # Excluir Artigo
     delete_res = client.delete(f"/api/articles/{article_id}", headers=headers)
     assert delete_res.status_code == 204

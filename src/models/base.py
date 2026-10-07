@@ -1,6 +1,6 @@
 """
-Base model for all GUARA models.
-Provides common fields and security constraints.
+Modelo base para todos os modelos do GUARA.
+Fornece campos comuns e restrições de segurança.
 """
 
 from datetime import datetime, timezone
@@ -14,7 +14,7 @@ def get_utc_now() -> datetime:
 
 
 class BaseModel(SQLModel):
-    """Base model with common fields and security constraints."""
+    """Modelo base com campos comuns e auditoria."""
 
     id: Optional[str] = Field(
         default_factory=lambda: str(uuid.uuid4()),
@@ -35,9 +35,9 @@ class BaseModel(SQLModel):
     )
 
     def is_not_deleted(self) -> bool:
-        """Check if the record is not soft-deleted."""
+        """Verifica se o registro não está marcado como excluído."""
         return not self.is_deleted
 
     def update_timestamp(self) -> None:
-        """Update the last modified timestamp."""
+        """Atualiza a data/hora da última modificação."""
         self.updated_at = datetime.now(timezone.utc)

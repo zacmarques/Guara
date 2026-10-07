@@ -1,6 +1,6 @@
 """
-User model with strict security constraints.
-Implements secure authentication and authorization.
+Modelo de usuário com restrições rígidas de segurança.
+Implementa autenticação e autorização seguras.
 """
 
 from typing import Optional, List, TYPE_CHECKING
@@ -13,7 +13,7 @@ if TYPE_CHECKING:
 
 class User(BaseModel, table=True):
     """
-    User model with enterprise-grade security.
+    Modelo de Usuário do sistema GUARA.
     """
 
     email: str = Field(
@@ -70,5 +70,5 @@ class User(BaseModel, table=True):
         nullable=True,
     )
 
-    # Relationship with Article
+    # Relacionamento com Artigos
     articles: List["Article"] = Relationship(back_populates="user")

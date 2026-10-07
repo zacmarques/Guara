@@ -1,6 +1,6 @@
 """
-Article model for academic publications.
-Supports ORCID integration and DOI lookup.
+Modelo de artigo para publicações acadêmicas.
+Suporta integração com ORCID e consulta de DOI.
 """
 
 from typing import Optional, TYPE_CHECKING
@@ -13,7 +13,7 @@ if TYPE_CHECKING:
 
 class Article(BaseModel, table=True):
     """
-    Academic article model with ORCID integration.
+    Modelo de Artigo Acadêmico com integração ORCID.
     """
 
     title: str = Field(
