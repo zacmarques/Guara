@@ -1,5 +1,5 @@
 """
-API Router for Users, Articles, and Authentication.
+Roteador da API para Usuários, Artigos e Autenticação.
 """
 
 from typing import List, Optional
@@ -17,7 +17,7 @@ from src.services.auth_service import AuthService
 router = APIRouter()
 
 
-# --- Schemas ---
+# --- Esquemas (Schemas) ---
 
 class UserRegisterRequest(BaseModel):
     email: EmailStr
@@ -76,14 +76,14 @@ class ArticleUpdateRequest(BaseModel):
     is_public: Optional[bool] = None
 
 
-# --- Auth & User Endpoints ---
+# --- Endpoints de Autenticação e Usuário ---
 
 @router.post("/auth/register", status_code=status.HTTP_201_CREATED)
 def register_user(
     data: UserRegisterRequest,
     session: Session = Depends(get_session)
 ):
-    """Register a new user."""
+    """Cadastra um novo usuário."""
     user_service = UserService(session)
     try:
         user = user_service.create_user(
@@ -93,7 +93,7 @@ def register_user(
             full_name=data.full_name,
             organization=data.organization,
         )
-        return {"id": user.id, "email": user.email, "message": "User registered successfully"}
+        return {"id": user.id, "email": user.email, "message": "Usuário cadastrado com sucesso"}
     except ValueError as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
 
@@ -103,13 +103,13 @@ def login_user(
     data: UserLoginRequest,
     session: Session = Depends(get_session)
 ):
-    """Authenticate user and return JWT access token."""
+    """Autentica o usuário e retorna o token de acesso JWT."""
     auth_service = AuthService(session)
     user = auth_service.authenticate_user(data.email, data.password)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid email or password",
+            detail="E-mail ou senha inválidos",
         )
 
     token = auth_service.create_access_token({"sub": user.id})
@@ -118,7 +118,7 @@ def login_user(
 
 @router.get("/users/me")
 def get_me(current_user: User = Depends(get_current_user)):
-    """Get profile of authenticated user."""
+    """Obtém o perfil do usuário autenticado."""
     return {
         "id": current_user.id,
         "email": current_user.email,
@@ -129,7 +129,7 @@ def get_me(current_user: User = Depends(get_current_user)):
     }
 
 
-# --- Article CRUD Endpoints ---
+# --- Endpoints CRUD de Artigos ---
 
 @router.post("/articles", status_code=status.HTTP_201_CREATED)
 def create_article(
@@ -137,7 +137,7 @@ def create_article(
     current_user: User = Depends(get_current_user),
     session: Session = Depends(get_session),
 ):
-    """Create a new academic article."""
+    """Cria um novo artigo acadêmico."""
     article_service = ArticleService(session)
     try:
         article = article_service.create_article(
@@ -172,7 +172,7 @@ def list_articles(
     current_user: User = Depends(get_current_user),
     session: Session = Depends(get_session),
 ):
-    """List all articles owned by authenticated user."""
+    """Lista todos os artigos do usuário autenticado."""
     article_service = ArticleService(session)
     return article_service.get_articles_by_user(current_user.id)
 
@@ -183,13 +183,13 @@ def get_article(
     current_user: User = Depends(get_current_user),
     session: Session = Depends(get_session),
 ):
-    """Get single article by ID."""
+    """Obtém um artigo específico pelo ID."""
     article_service = ArticleService(session)
     article = article_service.get_article(article_id)
     if not article:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Article not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Artigo não encontrado")
     if not article.is_public and article.user_id != current_user.id:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access denied")
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Acesso negado")
     return article
 
 
@@ -200,16 +200,16 @@ def update_article(
     current_user: User = Depends(get_current_user),
     session: Session = Depends(get_session),
 ):
-    """Update existing article."""
+    """Atualiza um artigo existente."""
     article_service = ArticleService(session)
     try:
         updated = article_service.update_article(
             article_id=article_id,
             user_id=current_user.id,
-            **data.dict(exclude_unset=True)
+            **data.model_dump(exclude_unset=True)
         )
         if not updated:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Article not found")
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Artigo não encontrado")
         return updated
     except PermissionError as e:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(e))
@@ -221,12 +221,12 @@ def delete_article(
     current_user: User = Depends(get_current_user),
     session: Session = Depends(get_session),
 ):
-    """Soft delete an article."""
+    """Realiza exclusão lógica de um artigo."""
     article_service = ArticleService(session)
     try:
         success = article_service.delete_article(article_id, user_id=current_user.id)
         if not success:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Article not found")
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Artigo não encontrado")
         return None
     except PermissionError as e:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(e))

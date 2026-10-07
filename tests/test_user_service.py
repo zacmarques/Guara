@@ -1,5 +1,5 @@
 """
-Tests for UserService.
+Testes para o UserService.
 """
 
 import pytest
@@ -21,7 +21,7 @@ def test_create_user_success(session: Session):
         email="test@example.com",
         password="SecurePassword123!",
         username="testuser",
-        full_name="Test User",
+        full_name="Usuário de Teste",
     )
     assert user.id is not None
     assert user.email == "test@example.com"
@@ -31,8 +31,8 @@ def test_create_user_success(session: Session):
 
 def test_create_user_invalid_password(session: Session):
     service = UserService(session)
-    with pytest.raises(ValueError, match="Password must be at least 12 characters"):
-        service.create_user(email="test@example.com", password="short")
+    with pytest.raises(ValueError, match="A senha deve ter pelo menos 12 caracteres"):
+        service.create_user(email="test@example.com", password="curta")
 
 
 def test_authenticate_user(session: Session):

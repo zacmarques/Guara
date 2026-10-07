@@ -1,6 +1,6 @@
 """
-User service - Business logic for user authentication and ORCID integration.
-Implements secure password handling and OAuth 2.0 flow.
+Serviço de Usuário - Lógica de negócios para autenticação e integração ORCID.
+Implementa armazenamento seguro de senhas e fluxo OAuth 2.0.
 """
 
 from datetime import datetime
@@ -12,17 +12,11 @@ from src.utils.security import hash_password, verify_password
 
 class UserService:
     """
-    Service layer for User operations.
-    
-    Responsibilities:
-    - User registration and authentication
-    - Secure password hashing/verification
-    - ORCID OAuth 2.0 integration
-    - Token management
+    Camada de serviço para operações de Usuário.
     """
 
     def __init__(self, session: Session):
-        """Initialize service with database session."""
+        """Inicializa o serviço com a sessão do banco de dados."""
         self.session = session
 
     def create_user(
@@ -35,37 +29,26 @@ class UserService:
         orcid_id: Optional[str] = None,
     ) -> User:
         """
-        Create a new user account with secure password hashing.
-        
-        Args:
-            email: User email (required, unique)
-            password: Plain text password (will be hashed)
-            username: Optional username
-            full_name: Optional full name
-            organization: Optional organization
-            orcid_id: Optional ORCID iD
-            
-        Returns:
-            Created User instance
+        Cria uma nova conta de usuário com hash de senha seguro.
         """
         if len(password) < 12:
-            raise ValueError("Password must be at least 12 characters")
+            raise ValueError("A senha deve ter pelo menos 12 caracteres")
         
         if not any(c.isupper() for c in password):
-            raise ValueError("Password must contain at least one uppercase letter")
+            raise ValueError("A senha deve conter pelo menos uma letra maiúscula")
         if not any(c.islower() for c in password):
-            raise ValueError("Password must contain at least one lowercase letter")
+            raise ValueError("A senha deve conter pelo menos uma letra minúscula")
         if not any(c.isdigit() for c in password):
-            raise ValueError("Password must contain at least one digit")
+            raise ValueError("A senha deve conter pelo menos um dígito")
         if not any(c in "!@#$%^&*()_+-=[]{}|;:,.<>?" for c in password):
-            raise ValueError("Password must contain at least one special character")
+            raise ValueError("A senha deve conter pelo menos um caractere especial")
 
-        # Check existing user
+        # Verifica usuário existente
         existing = self.session.exec(
             select(User).where(User.email == email.lower().strip(), User.is_deleted == False)
         ).first()
         if existing:
-            raise ValueError("Email already registered")
+            raise ValueError("E-mail já cadastrado no sistema")
 
         password_hash = hash_password(password)
 
@@ -94,7 +77,7 @@ class UserService:
         full_name: Optional[str] = None,
         organization: Optional[str] = None,
     ) -> User:
-        """Alias for create_user for backwards compatibility."""
+        """Alias para create_user por compatibilidade."""
         return self.create_user(
             email=email,
             password=password,
@@ -105,14 +88,7 @@ class UserService:
 
     def authenticate_user(self, email: str, password: str) -> Optional[User]:
         """
-        Authenticate user with email and password.
-        
-        Args:
-            email: User email
-            password: Plain text password
-            
-        Returns:
-            User if authentication successful, None otherwise
+        Autentica o usuário com e-mail e senha.
         """
         user = self.session.exec(
             select(User).where(User.email == email.lower().strip(), User.is_deleted == False)
@@ -130,23 +106,23 @@ class UserService:
 
     def reset_password(self, user_id: str, new_password: str) -> bool:
         """
-        Reset user password securely.
+        Redefine a senha do usuário com segurança.
         """
         user = self.get_user_by_id(user_id)
         if not user:
             return False
 
         if len(new_password) < 12:
-            raise ValueError("Password must be at least 12 characters")
+            raise ValueError("A senha deve ter pelo menos 12 caracteres")
         
         if not any(c.isupper() for c in new_password):
-            raise ValueError("Password must contain at least one uppercase letter")
+            raise ValueError("A senha deve conter pelo menos uma letra maiúscula")
         if not any(c.islower() for c in new_password):
-            raise ValueError("Password must contain at least one lowercase letter")
+            raise ValueError("A senha deve conter pelo menos uma letra minúscula")
         if not any(c.isdigit() for c in new_password):
-            raise ValueError("Password must contain at least one digit")
+            raise ValueError("A senha deve conter pelo menos um dígito")
         if not any(c in "!@#$%^&*()_+-=[]{}|;:,.<>?" for c in new_password):
-            raise ValueError("Password must contain at least one special character")
+            raise ValueError("A senha deve conter pelo menos um caractere especial")
 
         new_hash = hash_password(new_password)
         user.password_hash = new_hash
@@ -170,7 +146,7 @@ class UserService:
         orcid_access_token: Optional[str] = None,
         orcid_refresh_token: Optional[str] = None,
     ) -> Optional[User]:
-        """Update user fields."""
+        """Atualiza os campos do usuário."""
         user = self.get_user_by_id(user_id)
         if not user:
             return None
@@ -198,24 +174,24 @@ class UserService:
         return user
 
     def get_user_by_id(self, user_id: str) -> Optional[User]:
-        """Get user by ID (active only)."""
+        """Obtém usuário por ID (apenas ativos)."""
         return self.session.exec(
             select(User).where(User.id == user_id, User.is_deleted == False)
         ).first()
 
     def get_user(self, user_id: str) -> Optional[User]:
-        """Alias for get_user_by_id."""
+        """Alias para get_user_by_id."""
         return self.get_user_by_id(user_id)
 
     def get_by_email(self, email: str) -> Optional[User]:
-        """Get user by email (active only)."""
+        """Obtém usuário por e-mail (apenas ativos)."""
         return self.session.exec(
             select(User)
             .where(User.email == email.lower().strip(), User.is_deleted == False)
         ).first()
 
     def get_by_orcid_id(self, orcid_id: str) -> Optional[User]:
-        """Get user by ORCID ID (active only)."""
+        """Obtém usuário por ORCID ID (apenas ativos)."""
         return self.session.exec(
             select(User)
             .where(User.orcid_id == orcid_id, User.is_deleted == False)
@@ -229,11 +205,11 @@ class UserService:
         refresh_token: Optional[str] = None,
     ) -> None:
         """
-        Securely store ORCID OAuth tokens.
+        Armazena com segurança os tokens OAuth do ORCID.
         """
         user = self.get_user_by_id(user_id)
         if not user:
-            raise ValueError("User not found")
+            raise ValueError("Usuário não encontrado")
 
         user.orcid_id = orcid_id
         user.orcid_access_token = access_token

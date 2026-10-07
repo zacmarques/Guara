@@ -1,17 +1,17 @@
 """
-Main API router for GUARA.
-Organizes routes by domain and applies security middleware.
+Roteador Principal da API do GUARA.
+Organiza as rotas por domínio e aplica configurações de segurança.
 """
 
 from fastapi import APIRouter
 from src.api.orcid_auth import router as orcid_auth_router
 from src.api.router import router as api_router
 
-# Create main router
+# Cria roteador principal
 main_router = APIRouter()
 
-# Include ORCID authentication routes
+# Inclui rotas de autenticação ORCID
 main_router.include_router(orcid_auth_router)
 
-# Include core API routes
+# Inclui rotas principais da API
 main_router.include_router(api_router)

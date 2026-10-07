@@ -1,5 +1,5 @@
 """
-Tests for ArticleService.
+Testes para o ArticleService.
 """
 
 import pytest
@@ -22,17 +22,17 @@ def test_create_and_get_article(session: Session):
 
     article_service = ArticleService(session)
     article = article_service.create_article(
-        title="Quantum Computing Advancement",
+        title="Avanço em Computação Quântica",
         doi="10.1000/182",
         user_id=user.id,
     )
     assert article.id is not None
-    assert article.title == "Quantum Computing Advancement"
+    assert article.title == "Avanço em Computação Quântica"
     assert article.doi == "10.1000/182"
 
     fetched = article_service.get_article(article.id)
     assert fetched is not None
-    assert fetched.title == "Quantum Computing Advancement"
+    assert fetched.title == "Avanço em Computação Quântica"
 
 
 def test_update_and_delete_article(session: Session):
@@ -41,17 +41,17 @@ def test_update_and_delete_article(session: Session):
 
     article_service = ArticleService(session)
     article = article_service.create_article(
-        title="Initial Title",
+        title="Título Inicial",
         user_id=user.id,
     )
 
     updated = article_service.update_article(
         article_id=article.id,
-        title="Updated Title",
+        title="Título Atualizado",
         user_id=user.id,
     )
     assert updated is not None
-    assert updated.title == "Updated Title"
+    assert updated.title == "Título Atualizado"
 
     deleted = article_service.delete_article(article.id, user_id=user.id)
     assert deleted is True

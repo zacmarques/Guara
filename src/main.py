@@ -22,4 +22,4 @@ app.include_router(main_router, prefix="/api")
 
 @app.get("/")
 def read_root():
-    return {"message": "Welcome to GUARA API", "status": "online"}
+    return {"mensagem": "Bem-vindo à API GUARA", "status": "online"}
