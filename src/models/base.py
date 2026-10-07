@@ -3,63 +3,41 @@ Base model for all GUARA models.
 Provides common fields and security constraints.
 """
 
-from datetime import datetime
+from datetime import datetime, timezone
+import uuid
 from typing import Optional
 from sqlmodel import Field, SQLModel
 
 
-class BaseModel(SQLModel, table=True):
+def get_utc_now() -> datetime:
+    return datetime.now(timezone.utc)
+
+
+class BaseModel(SQLModel):
     """Base model with common fields and security constraints."""
 
-    # Security: UUIDs prevent enumeration attacks
     id: Optional[str] = Field(
-        default=None,
+        default_factory=lambda: str(uuid.uuid4()),
         primary_key=True,
         index=True,
-        sa_column=Field(
-            name="id",
-            type_=str,
-            nullable=False,
-            default=lambda: str(__import__("uuid").uuid4()),
-        ),
     )
 
-    # Audit fields with proper timestamps
     created_at: datetime = Field(
-        default_factory=datetime.utcnow,
-        sa_column=Field(
-            name="created_at",
-            type_=datetime,
-            nullable=False,
-            server_default="CURRENT_TIMESTAMP",
-        ),
+        default_factory=get_utc_now,
     )
     updated_at: datetime = Field(
-        default_factory=datetime.utcnow,
-        sa_column=Field(
-            name="updated_at",
-            type_=datetime,
-            nullable=False,
-            server_default="CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP",
-        ),
+        default_factory=get_utc_now,
     )
 
-    # Soft delete for data retention
     is_deleted: bool = Field(
         default=False,
         index=True,
-        sa_column=Field(
-            name="is_deleted",
-            type_=bool,
-            nullable=False,
-            default=False,
-        ),
     )
 
-    def is_active(self) -> bool:
+    def is_not_deleted(self) -> bool:
         """Check if the record is not soft-deleted."""
         return not self.is_deleted
 
     def update_timestamp(self) -> None:
         """Update the last modified timestamp."""
-        self.updated_at = datetime.utcnow()
+        self.updated_at = datetime.now(timezone.utc)

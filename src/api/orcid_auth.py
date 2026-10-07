@@ -4,99 +4,103 @@ ORCID Authentication Endpoints for FastAPI.
 
 from typing import Optional, Dict, Any
 from fastapi import APIRouter, HTTPException, status, Request, Depends
-from fastapi.security import OAuth2PasswordRequestForm
+from sqlmodel import Session
 from src.services.orcid_service import ORCIDService
+from src.services.user_service import UserService
+from src.services.auth_service import AuthService
+from src.api.deps import get_session, get_current_user
 from src.models.user import User
 from src.config.settings import settings
 import secrets
 import uuid
 
-# Create router instance
 router = APIRouter(prefix="/auth/orcid", tags=["ORCID Authentication"])
 
-# In-memory storage for state tokens (in production, use a database or cache)
 state_tokens = {}
-
-# Initialize ORCID service
-orcid_service = ORCIDService()
 
 
 @router.get("/login")
 async def orcid_login(request: Request):
     """
     Initiate ORCID OAuth 2.0 authentication flow.
-    
-    Generates a state token for CSRF protection and redirects to ORCID authorization URL.
     """
-    # Generate a secure state token
     state = secrets.token_urlsafe(32)
-    
-    # Store the state token with a timeout (in production, use Redis or database)
     state_tokens[state] = {
         'timestamp': uuid.uuid4().hex,
         'redirect_url': request.query_params.get('redirect_url', '/dashboard')
     }
-    
-    # Generate ORCID authorization URL
+    orcid_service = ORCIDService()
     auth_url = orcid_service.get_orcid_auth_url(state)
-    
-    # Redirect to ORCID authorization
     return {"auth_url": auth_url}
 
 
 @router.get("/callback")
-async def orcid_callback(request: Request):
+async def orcid_callback(
+    request: Request,
+    session: Session = Depends(get_session)
+):
     """
     Handle ORCID OAuth 2.0 callback.
-    
-    Receives authorization code, exchanges for access token, and fetches user profile.
     """
-    # Extract parameters from request
     code = request.query_params.get("code")
     state = request.query_params.get("state")
-    
-    # Validate state token (CSRF protection)
+
     if not state or state not in state_tokens:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Invalid or missing state parameter"
         )
-    
-    # Remove the state token after use
+
     del state_tokens[state]
-    
+
     if not code:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Authorization code not provided"
         )
-    
+
     try:
-        # Exchange authorization code for access token
+        orcid_service = ORCIDService(session=session)
         token_response = await orcid_service.exchange_code_for_token(code)
-        
-        # Get user profile from ORCID API
+
         access_token = token_response.get("access_token")
-        if not access_token:
+        refresh_token = token_response.get("refresh_token")
+        orcid_id = token_response.get("orcid")
+
+        if not access_token or not orcid_id:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="Failed to retrieve access token"
+                detail="Failed to retrieve token or ORCID ID"
             )
-        
-        # Fetch user profile (this would normally be used to create/update user)
-        orcid_profile = await orcid_service.get_user_profile(access_token)
-        
-        # Here you would typically create or update a user in your database
-        # For now, we'll return the profile data as an example
+
+        user_service = UserService(session)
+        user = user_service.get_by_orcid_id(orcid_id)
+        if not user:
+            user = user_service.create_user(
+                email=f"{orcid_id}@orcid.user",
+                password=f"OrcidUser123!_{orcid_id}",
+                orcid_id=orcid_id,
+            )
+
+        user_service.set_orcid_tokens(
+            user_id=user.id,
+            orcid_id=orcid_id,
+            access_token=access_token,
+            refresh_token=refresh_token
+        )
+
+        auth_service = AuthService(session)
+        jwt_token = auth_service.create_access_token({"sub": user.id})
+
         return {
             "message": "ORCID authentication successful",
-            "profile": orcid_profile,
-            "access_token": access_token,
-            "token_type": token_response.get("token_type")
+            "access_token": jwt_token,
+            "token_type": "bearer",
+            "user_id": user.id,
+            "orcid_id": orcid_id,
         }
-        
+
     except HTTPException:
-        # Re-raise HTTP exceptions
         raise
     except Exception as e:
         raise HTTPException(
@@ -106,21 +110,12 @@ async def orcid_callback(request: Request):
 
 
 @router.get("/logout")
-async def orcid_logout(request: Request):
-    """
-    Logout from ORCID authentication.
-    
-    Invalidates tokens and clears session state.
-    """
-    # In a real implementation, this would clear stored tokens and sessions
-    # For now, just return success message
+async def orcid_logout():
+    """Logout from ORCID session."""
     return {"message": "ORCID logout successful", "status": "success"}
 
 
-# Optional: Add a route to test ORCID integration
 @router.get("/test")
 async def orcid_test():
-    """
-    Test endpoint for ORCID service.
-    """
+    """Test endpoint for ORCID configuration status."""
     return {"message": "ORCID service is working", "configured": bool(settings.orcid_client_id)}

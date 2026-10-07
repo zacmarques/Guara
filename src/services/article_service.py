@@ -3,12 +3,10 @@ Article service - Business logic for academic articles.
 Handles DOI resolution, ORCID synchronization, and article CRUD.
 """
 
-import hashlib
 from datetime import datetime
-from typing import Optional
+from typing import Optional, List
 from sqlmodel import Session, select
 from src.models.article import Article
-from src.utils.security import hash_password, verify_password, generate_secure_token
 
 
 class ArticleService:
@@ -29,6 +27,7 @@ class ArticleService:
     def create_article(
         self,
         title: str,
+        content: Optional[str] = None,
         doi: Optional[str] = None,
         publication_type: Optional[str] = None,
         publication_date: Optional[str] = None,
@@ -53,12 +52,13 @@ class ArticleService:
         
         Args:
             title: Article title (required)
+            content: Optional article content
             doi: Digital Object Identifier
             publication_type: e.g., journal article, conference paper
             publication_date: YYYY-MM-DD
             volume, issue, pages, e_issn, p_issn
             abstract, keywords, url, publisher, language
-            authors: JSON string of author information
+            authors: JSON string or plain string of author information
             tags: Comma-separated tags
             notes: Private notes
             is_public: Whether article is publicly visible
@@ -67,18 +67,15 @@ class ArticleService:
         Returns:
             Created Article instance
         """
-        # Validate required field
         if not title:
             raise ValueError("Title is required")
 
-        # Sanitize input
         title = self._sanitize_string(title, max_length=1000)
-        doi = self._sanitize_string(doi, max_length=100)
-        url = self._sanitize_string(url, max_length=500)
-        publisher = self._sanitize_string(publisher, max_length=255)
-        language = self._sanitize_string(language, max_length=50)
+        doi = self._sanitize_string(doi, max_length=100) if doi else None
+        url = self._sanitize_string(url, max_length=500) if url else None
+        publisher = self._sanitize_string(publisher, max_length=255) if publisher else None
+        language = self._sanitize_string(language, max_length=50) if language else None
 
-        # Check for existing DOI
         if doi:
             existing = self.session.exec(
                 select(Article).where(Article.doi == doi, Article.is_deleted == False)
@@ -88,11 +85,12 @@ class ArticleService:
                 existing.doi_last_checked = datetime.utcnow().isoformat()
                 self.session.add(existing)
                 self.session.commit()
+                self.session.refresh(existing)
                 return existing
 
-        # Create article
         article = Article(
             title=title,
+            content=content,
             doi=doi,
             doi_resolved=doi,
             doi_last_checked=datetime.utcnow().isoformat() if doi else None,
@@ -129,6 +127,13 @@ class ArticleService:
             .where(Article.id == article_id, Article.is_deleted == False)
         ).first()
 
+    def get_articles_by_user(self, user_id: str) -> List[Article]:
+        """Get all articles owned by or associated with a user."""
+        return list(self.session.exec(
+            select(Article)
+            .where(Article.user_id == user_id, Article.is_deleted == False)
+        ).all())
+
     def get_by_doi(self, doi: str) -> Optional[Article]:
         """Get article by DOI (active only)."""
         return self.session.exec(
@@ -140,6 +145,7 @@ class ArticleService:
         self,
         article_id: str,
         title: Optional[str] = None,
+        content: Optional[str] = None,
         doi: Optional[str] = None,
         publication_type: Optional[str] = None,
         publication_date: Optional[str] = None,
@@ -168,16 +174,17 @@ class ArticleService:
         if not article:
             return None
 
-        # Only owner or admin can update
-        if user_id and not article.is_owner and user_id != "admin":
+        if user_id and article.user_id and article.user_id != user_id and user_id != "admin":
             raise PermissionError("Only the article owner can modify this article")
 
-        # Update fields
         if title is not None:
             article.title = self._sanitize_string(title, max_length=1000)
+        if content is not None:
+            article.content = content
         if doi is not None:
-            article.doi = self._sanitize_string(doi, max_length=100)
-            article.doi_resolved = doi
+            sanitized_doi = self._sanitize_string(doi, max_length=100)
+            article.doi = sanitized_doi
+            article.doi_resolved = sanitized_doi
             article.doi_last_checked = datetime.utcnow().isoformat()
         if publication_type is not None:
             article.publication_type = self._sanitize_string(publication_type, max_length=100)
@@ -229,7 +236,7 @@ class ArticleService:
         if not article:
             return False
 
-        if user_id and not article.is_owner and user_id != "admin":
+        if user_id and article.user_id and article.user_id != user_id and user_id != "admin":
             raise PermissionError("Only the article owner can delete this article")
 
         article.is_deleted = True
@@ -245,9 +252,6 @@ class ArticleService:
         """
         Synchronize articles from ORCID API.
         
-        This would integrate with the real ORCID API in production.
-        For now, demonstrates secure token handling.
-        
         Args:
             orcid_id: ORCID identifier
             access_token: OAuth access token (never logged)
@@ -256,15 +260,13 @@ class ArticleService:
         Returns:
             Synchronization result
         """
-        # Store tokens securely (in production, encrypt at rest)
         from src.services.user_service import UserService
 
         user_service = UserService(self.session)
-        user = user_service.get_user(user_id)
+        user = user_service.get_user_by_id(user_id)
         if not user:
             raise ValueError("User not found")
 
-        # Store refresh token securely (never plain text in logs)
         user_service.set_orcid_tokens(user_id, orcid_id, access_token)
 
         return {
@@ -277,7 +279,5 @@ class ArticleService:
         """Sanitize string input to prevent injection attacks."""
         if not value:
             return ""
-        # Remove null bytes and other dangerous characters
         sanitized = value.replace("\x00", "")
-        # Truncate to max length
         return sanitized[:max_length]

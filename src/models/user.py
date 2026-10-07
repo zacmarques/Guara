@@ -3,123 +3,72 @@ User model with strict security constraints.
 Implements secure authentication and authorization.
 """
 
-from typing import Optional
-from sqlmodel import Field, SQLModel
+from typing import Optional, List, TYPE_CHECKING
+from sqlmodel import Field, Relationship
+from src.models.base import BaseModel
+
+if TYPE_CHECKING:
+    from src.models.article import Article
 
 
-class User(SQLModel, table=True):
+class User(BaseModel, table=True):
     """
     User model with enterprise-grade security.
-    
-    Security features:
-    - Password hashing with bcrypt (cost factor >= 12)
-    - No plain-text password storage
-    - Indexed email for fast lookups
-    - Soft delete for audit trails
     """
 
-    # User identity
     email: str = Field(
         max_length=255,
         index=True,
         unique=True,
-        sa_column=Field(
-            name="email",
-            type_=str,
-            nullable=False,
-            index=True,
-            unique=True,
-        ),
+        nullable=False,
     )
     username: Optional[str] = Field(
+        default=None,
         max_length=50,
-        sa_column=Field(
-            name="username",
-            type_=str,
-            nullable=True,
-        ),
+        nullable=True,
     )
 
-    # Security: Passwords MUST be hashed - never store plain text
     password_hash: str = Field(
         max_length=255,
-        sa_column=Field(
-            name="password_hash",
-            type_=str,
-            nullable=False,
-        ),
+        nullable=False,
     )
 
-    # OAuth 2.0 / ORCID integration
     orcid_id: Optional[str] = Field(
+        default=None,
         max_length=20,
         index=True,
         unique=True,
-        sa_column=Field(
-            name="orcid_id",
-            type_=str,
-            nullable=True,
-            index=True,
-            unique=True,
-        ),
+        nullable=True,
     )
     orcid_access_token: Optional[str] = Field(
-        sa_column=Field(
-            name="orcid_access_token",
-            type_=str,
-            nullable=True,
-        ),
+        default=None,
+        nullable=True,
     )
     orcid_refresh_token: Optional[str] = Field(
-        sa_column=Field(
-            name="orcid_refresh_token",
-            type_=str,
-            nullable=True,
-        ),
+        default=None,
+        nullable=True,
     )
 
-    # Account status
     is_active: bool = Field(
         default=True,
         index=True,
-        sa_column=Field(
-            name="is_active",
-            type_=bool,
-            nullable=False,
-            default=True,
-            index=True,
-        ),
+        nullable=False,
     )
     is_verified: bool = Field(
         default=False,
-        sa_column=Field(
-            name="is_verified",
-            type_=bool,
-            nullable=False,
-            default=False,
-        ),
+        nullable=False,
     )
 
-    # Metadata
     full_name: Optional[str] = Field(
+        default=None,
         max_length=255,
-        sa_column=Field(
-            name="full_name",
-            type_=str,
-            nullable=True,
-        ),
+        nullable=True,
     )
     organization: Optional[str] = Field(
+        default=None,
         max_length=255,
-        sa_column=Field(
-            name="organization",
-            type_=str,
-            nullable=True,
-        ),
+        nullable=True,
     )
 
-    def update_timestamp(self) -> None:
-        """Update the last modified timestamp."""
-        from src.models.base import BaseModel
-
-        BaseModel.update_timestamp(self)
+    # Relationship with Article
+    articles: List["Article"] = Relationship(back_populates="user")
