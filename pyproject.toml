@@ -1,0 +1,49 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "guara"
+version = "0.1.0"
+description = "Gerenciamento Unificado de Artigos e Referências Acadêmicas"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi>=0.109.0",
+    "uvicorn[standard]>=0.27.0",
+    "sqlmodel>=0.0.14",
+    "alembic>=1.13.0",
+    "mysqlclient>=2.2.0",
+    "bcrypt>=4.1.0",
+    "python-jose[cryptography]>=3.3.0",
+    "pydantic-settings>=2.1.0",
+    "pandas>=2.1.0",
+    "openpyxl>=3.1.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4.0",
+    "pytest-asyncio>=0.21.0",
+    "httpx>=0.25.0",
+    "pytest-cov>=4.1.0",
+    "ruff>=0.1.0",
+    "bandit>=1.7.0",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+asyncio_mode = "auto"
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+select = ["E", "F", "W", "I", "N", "UP"]
+ignore = []
+
+[tool.bandit]
+skips = []
