@@ -1,6 +1,4 @@
-# [PROJECT_NAME] Constitution
-<!-- Example: Spec Constitution, TaskFlow Constitution, etc. -->
-
+# GUARA Constitution
 ## Core Principles
 
 ### [PRINCIPLE_1_NAME]
@@ -48,3 +46,56 @@
 
 **Version**: [CONSTITUTION_VERSION] | **Ratified**: [RATIFICATION_DATE] | **Last Amended**: [LAST_AMENDED_DATE]
 <!-- Example: Version: 2.1.1 | Ratified: 2025-06-13 | Last Amended: 2025-07-16 -->
+
+# GUARA Constitution
+
+## Article I - Zero-Trust Architecture (ZTA)
+
+### Section 1.1 - Network Security Posture
+All system components must operate under a Zero-Trust Architecture model, where no implicit trust is granted to any network segment or service.
+
+### Section 1.2 - Public Interface Restrictions
+Public interfaces must not be exposed without middleware authentication. Binding to 0.0.0.0 without authentication is strictly prohibited.
+
+### Section 1.3 - Transport Security
+All production endpoints must use HTTPS/TLS 1.3 exclusively for secure communication.
+
+## Article II - ORCID API Integration & OAuth 2.0 Compliance
+
+### Section 2.1 - Redirect URI Validation
+Redirect URIs must be validated using pinned matching with strict validation, prohibiting wildcarding or open redirects.
+
+### Section 2.2 - PKCE Implementation
+PKCE (Proof Key for Code Exchange) must be implemented with cryptographic secure state parameter verification against CSRF attacks.
+
+### Section 2.3 - Rate Limiting and Exception Handling
+Rate limiting and exception handling must be implemented to prevent ORCID API quota exhaustion or IP bans through exponential backoff and circuit breaker patterns.
+
+### Section 2.4 - At-Rest Encryption
+Client Secrets and Refresh Tokens must be encrypted using AES-256 (GCM) for data at rest.
+
+## Article III - Data Persistence & Database Layer
+
+### Section 3.1 - SQL Injection Prevention
+Prevention of SQL Injection attacks through the use of Prepared Statements or Parameterized Queries via ORM (SQLAlchemy/SQLModel).
+
+### Section 3.2 - Principle of Least Privilege
+Database connections must follow the Principle of Least Privilege, with database roles lacking DDL privileges such as DROP or ALTER at runtime.
+
+### Section 3.3 - Schema Validation
+Schema validation must include Type Enforcement, Check Constraints, Foreign Key Cascades, and Unique Indexes.
+
+### Section 3.4 - Input Sanitization and Validation
+All API payloads must be validated and sanitized using Pydantic Schemas before processing.
+
+## Article IV - AI Agent Code Generation Rules
+
+### Section 4.1 - Prohibition of Mocks and Placeholders
+No mocks, pseudocodes, MOPs, or placeholders (TODOs) are allowed in critical authentication, validation, or encryption routes.
+
+### Section 2.2 - Static Application Security Testing
+All generated code must pass Static Application Security Testing using Bandit and Ruff before approval.
+
+### Section 4.3 - Fail-Secure Default
+In case of unhandled failures, the system must terminate connections/transactions without exposing stack traces or infrastructure metadata in HTTP responses.
+
