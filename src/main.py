@@ -22,4 +22,8 @@ app.include_router(main_router, prefix="/api")
 
 @app.get("/")
 def read_root():
+<<<<<<< Updated upstream
     return {"mensagem": "Bem-vindo à API GUARA", "status": "online"}
+=======
+    return {"message": "Bem-vindo ao GUARA APP", "status": "online"}
+>>>>>>> Stashed changes

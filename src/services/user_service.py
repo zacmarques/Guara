@@ -48,7 +48,11 @@ class UserService:
             select(User).where(User.email == email.lower().strip(), User.is_deleted == False)
         ).first()
         if existing:
+<<<<<<< Updated upstream
             raise ValueError("E-mail já cadastrado no sistema")
+=======
+            raise ValueError("Email já registrado")
+>>>>>>> Stashed changes
 
         password_hash = hash_password(password)
 
