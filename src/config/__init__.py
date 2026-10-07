@@ -1,1 +1,1 @@
-# GUARA Configuration
+# Configurações do GUARA
