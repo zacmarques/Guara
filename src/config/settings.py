@@ -46,12 +46,12 @@ class Settings(BaseSettings):
     security_bcrypt_cost: int = 12
 
     # CORS (strict mode - only allow specific origins)
-    cors_origins: List[str] = ["http://localhost:3000", "https://guara.example.com"]
+    cors_origins: List[str] = ["http://localhost:3000", "https://localhost:8000", "https://guara.example.com"]
 
-    # ORCID API
+    # ORCID API (HTTPS requirement for OAuth 2.0 redirect)
     orcid_client_id: str = os.getenv("ORCID_CLIENT_ID", "")
     orcid_client_secret: str = os.getenv("ORCID_CLIENT_SECRET", "")
-    orcid_redirect_uri: str = os.getenv("ORCID_REDIRECT_URI", "http://localhost:8000/auth/orcid/callback")
+    orcid_redirect_uri: str = os.getenv("ORCID_REDIRECT_URI", "https://localhost:8000/api/auth/orcid/callback")
     orcid_scopes: List[str] = [
         "read_delimited_output",
         "read_publications",
