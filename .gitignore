@@ -61,6 +61,31 @@ local_settings.py
 db.sqlite3
 db.sqlite3-journal
 
+# Criptografia, Chaves e Certificados SSL/OAuth
+*.pem
+*.key
+*.crt
+cert.pem
+key.pem
+.env
+.env.*
+
+# Ambiente Virtual e Cache Python
+.venv/
+venv/
+__pycache__/
+*.pyc
+
+# Banco de Dados Local (se usar SQLite para testes)
+*.db
+*.sqlite3
+
+# Logs e Arquivos Temporários de IDE/Sistemas
+.vscode/
+.idea/
+.DS_Store
+*.log
+
 # Flask stuff:
 instance/
 .webassets-cache
