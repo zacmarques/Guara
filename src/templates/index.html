@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GUARA - Gerenciador Unificado de Registros Acadêmicos</title>
+    <style>
+        :root {
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-color: #0f172a;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+            --primary-color: #2563eb;
+            --primary-hover: #1d4ed8;
+            --orcid-color: #a6ce39;
+            --orcid-hover: #8eb82b;
+            --radius: 8px;
+            --shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-color: #0f172a;
+                --card-bg: #1e293b;
+                --text-color: #f8fafc;
+                --text-muted: #94a3b8;
+                --border-color: #334155;
+            }
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.5;
+            padding: 2rem 1rem;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        header {
+            margin-bottom: 2.5rem;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            letter-spacing: -0.025em;
+        }
+
+        header p {
+            color: var(--text-muted);
+            font-size: 1rem;
+            margin-top: 0.25rem;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: var(--shadow);
+        }
+
+        .card h2 {
+            font-size: 1.25rem;
+            margin-bottom: 1rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin-bottom: 0.25rem;
+        }
+
+        input[type="text"], input[type="email"], input[type="password"], textarea, select {
+            width: 100%;
+            padding: 0.625rem;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            background: var(--bg-color);
+            color: var(--text-color);
+            font-size: 0.875rem;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.625rem 1.25rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            border-radius: var(--radius);
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            text-decoration: none;
+        }
+
+        .btn-primary { background: var(--primary-color); color: #fff; }
+        .btn-primary:hover { background: var(--primary-hover); }
+
+        .btn-orcid { background: var(--orcid-color); color: #fff; width: 100%; font-size: 1rem; }
+        .btn-orcid:hover { background: var(--orcid-hover); }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+            font-size: 0.875rem;
+        }
+
+        th, td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        th { font-weight: 600; color: var(--text-muted); }
+
+        .tag {
+            display: inline-block;
+            padding: 0.125rem 0.5rem;
+            font-size: 0.75rem;
+            border-radius: 9999px;
+            background: var(--border-color);
+            color: var(--text-muted);
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 3rem;
+            font-size: 0.875rem;
+            color: var(--text-muted);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>GUARA</h1>
+            <p>Gerenciador Unificado de Atualização de Registros Acadêmicos</p>
+        </header>
+
+        <div class="grid">
+            <div class="card">
+                <h2>Autenticação Simplificada</h2>
+                <div class="form-group">
+                    <a href="/api/auth/orcid/login" class="btn btn-orcid">Conectar com ORCID</a>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>Acesso à Conta</h2>
+                <form action="/api/auth/login" method="POST">
+                    <div class="form-group">
+                        <label for="email">E-mail</label>
+                        <input type="email" id="email" name="email" placeholder="usuario@exemplo.com" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Senha</label>
+                        <input type="password" id="password" name="password" placeholder="••••••••" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width: 100%;">Entrar</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Cadastrar Novo Artigo</h2>
+            <form action="/api/articles" method="POST">
+                <div class="grid">
+                    <div class="form-group">
+                        <label for="title">Título do Artigo</label>
+                        <input type="text" id="title" name="title" placeholder="Ex: Análise da Produção Histórica..." required>
+                    </div>
+                    <div class="form-group">
+                        <label for="doi">DOI (Opcional)</label>
+                        <input type="text" id="doi" name="doi" placeholder="10.1000/182">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="abstract">Resumo</label>
+                    <textarea id="abstract" name="abstract" rows="3" placeholder="Resumo da publicação acadêmica..."></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Salvar Artigo</button>
+            </form>
+        </div>
+
+        <div class="card">
+            <h2>Minhas Produções Acadêmicas</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Título</th>
+                        <th>DOI</th>
+                        <th>Status ORCID</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Nenhum artigo cadastrado no momento.</td>
+                        <td>-</td>
+                        <td><span class="tag">Pendente</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <footer>
+            &copy; GUARA - Plataforma de Gestão Acadêmica SaaS
+        </footer>
+    </div>
+</body>
+</html>

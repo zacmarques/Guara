@@ -36,7 +36,8 @@ client = TestClient(app)
 def test_root_endpoint():
     response = client.get("/")
     assert response.status_code == 200
-    assert response.json()["status"] == "online"
+    assert "GUARA" in response.text
+    assert "<!DOCTYPE html>" in response.text
 
 
 def test_register_and_login_flow():
