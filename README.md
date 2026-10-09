@@ -62,15 +62,17 @@ O **GUARA** visa eliminar o processo manual, burocrático e cansativo de registr
 
 1. **Clone o repositório:**
 
-   ```bash
+   ```text
+   bash
    git clone [https://github.com/zacmarques/Guara.git](https://github.com/zacmarques/Guara.git)
-```
+	```
 
 2. **Acesse a pasta e instale dependências**
-	```bash
+	```text
+ 	bash
 	cd Guara
 	pip install -r requirements.txt
-```
+	```
 
 3. **Configure as Variáveis de Ambiente:**
 Crie um arquivo .env na raiz do projeto com as credenciais do ORCID e Lattes (não versione este arquivo).
@@ -79,9 +81,10 @@ Crie um arquivo .env na raiz do projeto com as credenciais do ORCID e Lattes (n�
 Nota: Ao executar a aplicação, o arquivo guara.db será criado/atualizado automaticamente. Ele já consta no .gitignore para não ser enviado ao GitHub, mantendo seus dados de sessão e autenticação seguros.
 
 5. **Executando a aplicação**
-	```bash
+	```text
+ 	bash
 	uvicorn src.main:app --reload
-```
+	```
 
 ##🤝 Contribuindo
 Este projeto é open source e feito para a comunidade acadêmica. Contribuições são bem-vindas! Se você tem uma ideia ou correção, não hesite em abrir uma issue ou pull request.
