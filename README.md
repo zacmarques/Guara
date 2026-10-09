@@ -48,29 +48,26 @@ O **GUARA** visa eliminar o processo manual, burocrático e cansativo de registr
 ---
 ## 📁 Estrutura do Projeto
 
-Guara/
+```Guara/
 ├── src/                               # Código-fonte
 ├── tests/                             # Testes automatizados
 ├── .specify/                          # Configurações de especificação
 ├── .gitignore                         # Regras de arquivos não versionados (como guara.db e .env)
 ├── pyproject.toml                     # Configuração do projeto
 ├── requirements.txt                   # Dependências Python
-└── central_producoes_historicas.xlsx  # Dados salvos legado
+└── central_producoes_historicas.xlsx  # Dados salvos legado```
 
 ## 🚀 Como Começar
 
 1. **Clone o repositório:**
 
    ```bash
-   git clone [https://github.com/zacmarques/Guara.git](https://github.com/zacmarques/Guara.git)
-```
+   git clone [https://github.com/zacmarques/Guara.git](https://github.com/zacmarques/Guara.git)```
 
 2. **Acesse a pasta e instale dependências**
-
-```bash
-cd Guara
-pip install -r requirements.txt
-```
+	```bash
+	cd Guara
+	pip install -r requirements.txt```
 
 3. **Configure as Variáveis de Ambiente:**
 Crie um arquivo .env na raiz do projeto com as credenciais do ORCID e Lattes (não versione este arquivo).
@@ -80,8 +77,7 @@ Nota: Ao executar a aplicação, o arquivo guara.db será criado/atualizado auto
 
 5. **Executando a aplicação**
 	```bash
-	uvicorn src.main:app --reload
-```
+	uvicorn src.main:app --reload```
 
 ##🤝 Contribuindo
 Este projeto é open source e feito para a comunidade acadêmica. Contribuições são bem-vindas! Se você tem uma ideia ou correção, não hesite em abrir uma issue ou pull request.
