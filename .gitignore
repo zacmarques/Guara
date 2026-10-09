@@ -267,7 +267,7 @@ Thumbs.db
 *.log
 *.sqlite3
 *.db
-guara.db
+*guara.db
 
 #Project only
 /home/jules/verification/
