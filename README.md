@@ -88,7 +88,9 @@ Nota: Ao executar a aplicação, o arquivo guara.db será criado/atualizado auto
 
 ## 🤝 Contribuindo
 
-Este projeto é open source e feito para a comunidade acadêmica. Contribuições são bem-vindas! Se você tem uma ideia ou correção, não hesite em abrir uma issue ou pull request.
+Este projeto é open source e feito para a comunidade acadêmica.
+Contribuições são bem-vindas! Se você tem uma ideia ou correção, não hesite em abrir uma issue ou pull request.
+Usei "https://dribbble.com/shots/27214788-Keyvo-Websit" como referência de design minimalista para o frontend e deixo aqui a devida citação do autor.
 
 > [!IMPORTANT]
 > Sou um profissional da área de História, não um programador formado. Use o aplicativo sabendo que podem ocorrer erros e problemas, e a utilização é por sua conta e risco.
@@ -96,10 +98,8 @@ Este projeto é open source e feito para a comunidade acadêmica. Contribuiçõe
 ## 📄 Licença
 Este projeto está licenciado sob a CC BY-NC 4.0 (Attribution-NonCommercial 4.0 International).
 
-Regras de Uso:
-
-Qualquer um pode utilizar em uso pessoal, para fins de pesquisa e/ou estudos.
-
-Fica vedada qualquer tentativa de privatização ou comercialização do código do Guara.
-
-O Guara é uma feature do público acadêmico e deve se manter público.
+> [!IMPORTANT]
+> Regras de Uso:
+> Qualquer um pode utilizar em uso pessoal, para fins de pesquisa e/ou estudos.
+> Fica vedada qualquer tentativa de privatização ou comercialização do código do Guara.
+> O Guara é uma feature do público acadêmico e deve se manter público.
