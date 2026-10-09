@@ -33,7 +33,7 @@ O **GUARA** visa eliminar o processo manual, burocrático e cansativo de registr
 - 🔄 **Integração ORCID**: Exportação automática de publicações para a plataforma ORCID.
 - 📚 **Importação Lattes**: Sincronização de dados para o Currículo Lattes.
 - 🚀 **Automação de Tarefas Repetitivas**: Python automatiza o trabalho manual para manter o processo prático e rápido.
-- 🔐 **Autenticação e Sessão**: Sistema de usuário, login e senha. Cada pesquisador inicia uma sessão que persiste os dados durante o preenchimento. Se o navegador fechar ou ocorrer uma interrupção, os dados da sessão são mantidos — sem necessidade de reiniciar tudo.
+- 🔐 **Autenticação e Sessão**: Sistema de usuário, login e senha. Cada pesquisador inicia uma sessão que persiste os dados durante o preenchimento no banco de dados local (`guara.db`). Se o navegador fechar ou ocorrer uma interrupção, os dados da sessão são mantidos — sem necessidade de reiniciar tudo.
 
 ---
 
@@ -41,66 +41,62 @@ O **GUARA** visa eliminar o processo manual, burocrático e cansativo de registr
 
 - **Python** 🐍
 - **FastAPI** (Framework Web) ⚡
+- **SQLite** (Banco de dados local) 🗄️
 - **ORCID API** 🔗
 - **Currículo Lattes** 📄
 
 ---
+## 📁 Estrutura do Projeto
+
+Guara/
+├── src/                               # Código-fonte
+├── tests/                             # Testes automatizados
+├── .specify/                          # Configurações de especificação
+├── .gitignore                         # Regras de arquivos não versionados (como guara.db e .env)
+├── pyproject.toml                     # Configuração do projeto
+├── requirements.txt                   # Dependências Python
+└── central_producoes_historicas.xlsx  # Dados salvos legado
 
 ## 🚀 Como Começar
 
 1. **Clone o repositório:**
 
    ```bash
-   git clone https://github.com/zacmarques/Guara.git
-   ```
-
-2. **Instale as dependências:**
-
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-3. **Configure seu .env** com as credenciais do ORCID e Lattes.
-
-4. **Execute a aplicação:**
-
-   ```bash
-   uvicorn src.main:app --reload
-   ```
-
----
-
-## 📁 Estrutura do Projeto
-
-```text
-Guara/
-├── src/             # Código-fonte
-├── tests/           # Testes
-├── .specify/        # Configurações de especificação
-├── pyproject.toml   # Configuração do projeto
-├── requirements.txt # Dependências
-└── central_producoes_historicas.xlsx # Dados históricos
+   git clone [https://github.com/zacmarques/Guara.git](https://github.com/zacmarques/Guara.git)
 ```
 
----
+2. **Acesse a pasta e instale dependências**
 
-## 🤝 Contribuindo
+```bash
+cd Guara
+pip install -r requirements.txt
+```
 
+3. **Configure as Variáveis de Ambiente:**
+Crie um arquivo .env na raiz do projeto com as credenciais do ORCID e Lattes (não versione este arquivo).
+
+4. **Banco de Dados Local (guara.db):**
+Nota: Ao executar a aplicação, o arquivo guara.db será criado/atualizado automaticamente. Ele já consta no .gitignore para não ser enviado ao GitHub, mantendo seus dados de sessão e autenticação seguros.
+
+5. **Executando a aplicação**
+	```bash
+	uvicorn src.main:app --reload
+```
+
+##🤝 Contribuindo
 Este projeto é open source e feito para a comunidade acadêmica. Contribuições são bem-vindas! Se você tem uma ideia ou correção, não hesite em abrir uma issue ou pull request.
 
----
+[!IMPORTANT]
 
-## 📄 Licença
+Sou um profissional da área de História, não um programador formado. Use o aplicativo sabendo que podem ocorrer erros e problemas, e a utilização é por sua conta e risco.
 
-Este projeto está licenciado sob a **CC BY-NC 4.0 (Attribution-NonCommercial 4.0 International)**.
+##📄 Licença
+Este projeto está licenciado sob a CC BY-NC 4.0 (Attribution-NonCommercial 4.0 International).
 
-> **Regras de Uso:**
-> - Qualquer um pode utilizar em uso pessoal, para fins de pesquisa e/ou estudos.
-> - Fica vedada qualquer tentativa de privatização ou comercialização do código do Guara.
-> - O Guara é uma feature do público acadêmico e deve se manter público.
+Regras de Uso:
 
----
+Qualquer um pode utilizar em uso pessoal, para fins de pesquisa e/ou estudos.
 
-<div align="center">
-  <p>Desenvolvido por <strong>Isaac Marques de Souza Garcia </strong> </p>
-</div>
+Fica vedada qualquer tentativa de privatização ou comercialização do código do Guara.
+
+O Guara é uma feature do público acadêmico e deve se manter público.
