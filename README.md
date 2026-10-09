@@ -86,14 +86,14 @@ Nota: Ao executar a aplicação, o arquivo guara.db será criado/atualizado auto
 	uvicorn src.main:app --reload
 	```
 
-##🤝 Contribuindo
+## 🤝 Contribuindo
+
 Este projeto é open source e feito para a comunidade acadêmica. Contribuições são bem-vindas! Se você tem uma ideia ou correção, não hesite em abrir uma issue ou pull request.
 
-[!IMPORTANT]
+> [!IMPORTANT]
+> Sou um profissional da área de História, não um programador formado. Use o aplicativo sabendo que podem ocorrer erros e problemas, e a utilização é por sua conta e risco.
 
-Sou um profissional da área de História, não um programador formado. Use o aplicativo sabendo que podem ocorrer erros e problemas, e a utilização é por sua conta e risco.
-
-##📄 Licença
+## 📄 Licença
 Este projeto está licenciado sob a CC BY-NC 4.0 (Attribution-NonCommercial 4.0 International).
 
 Regras de Uso:
